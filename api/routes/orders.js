@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../middleware/check-auth');
 
 const Order = require('../models/order');
 const Product = require('../models/product');
 
 
 // READ ALL ORDERS
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
   Order.find()
     .select('-__v') // we want to get all props except for __v
     // .populate('product') // will populate with product data, and will get all product data if empty
@@ -39,7 +40,7 @@ router.get('/', (req, res, next) => {
 
 
 // CREATE ONE ORDER
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
   // checking if we have product id in DB, we can't create an order for product that doesn't exist in DB
   Product.findById(req.body.productId)
     .then(product => {
@@ -85,7 +86,7 @@ router.post('/', (req, res, next) => {
 
 
 // READ ONE ORDER
-router.get('/:orderId', (req, res, next) => {
+router.get('/:orderId', checkAuth, (req, res, next) => {
   Order.findById(req.params.orderId)
     .populate('product') // here we will get all product data and populate to product prop of found order
     .exec()

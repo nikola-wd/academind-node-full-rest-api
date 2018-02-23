@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../middleware/check-auth'); // custom JWT authentication verification middleware
 // TODO: find a way to resize and optimize images
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -86,8 +87,8 @@ router.get('/', (req, res, next) => {
 
 
 
-// CREATE                     // productImage is the field name
-router.post('/', upload.single('productImage'), (req, res, next) => {
+// CREATE     // comparing jsw tokens   // productImage is the field name
+router.post('/', checkAuth, upload.single('productImage'), (req, res, next) => {
   console.log(req.file);
 
   const product = new Product({
@@ -159,7 +160,7 @@ router.get('/:productId', (req, res, next) => {
 
 
 // UPDATE
-router.patch('/:productId', (req, res, next) => {
+router.patch('/:productId', checkAuth, (req, res, next) => {
   const id = req.params.productId;       // we still wanna use the same ID, so not updating that
   const updateOps = {};
   // check what we are updating (we don't need to change all props of obj)
@@ -201,7 +202,7 @@ router.patch('/:productId', (req, res, next) => {
 
 
 // DELETE
-router.delete('/:productId', (req, res, next) => {
+router.delete('/:productId', checkAuth, (req, res, next) => {
   const id = req.params.productId;
   Product.remove({ _id: id }).exec()
     .then(result => {
